@@ -47,6 +47,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Task Board specific colors
+        "board-bg": "hsl(var(--board-background))",
+        "list-bg": "hsl(var(--list-background))",
+        "list-header": "hsl(var(--list-header))",
+        "task-high": "hsl(var(--task-priority-high))",
+        "task-medium": "hsl(var(--task-priority-medium))",
+        "task-low": "hsl(var(--task-priority-low))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -84,6 +91,12 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.3s ease-out",
+        "slide-in": "slide-in 0.3s ease-out",
+      },
+      boxShadow: {
+        "card": "0 1px 3px 0 hsl(var(--card-shadow))",
+        "card-hover": "0 4px 12px 0 hsl(var(--card-hover-shadow))",
       },
     },
   },
