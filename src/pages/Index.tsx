@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DndContext, DragEndEvent, DragOverEvent, closestCorners } from "@dnd-kit/core";
 import { toast } from "sonner";
 import BoardHeader from "@/components/BoardHeader";
 import BoardList from "@/components/BoardList";
 import TaskDialog from "@/components/TaskDialog";
+import AuthDialog from "@/components/AuthDialog";
 import { Board, List, Task } from "@/types/board";
 
 const Index = () => {
@@ -73,6 +74,17 @@ const Index = () => {
     task?: Task | null;
     listId?: string;
   }>({ open: false });
+
+  const [authDialog, setAuthDialog] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+
+  // Check for existing user session on component mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem('taskboard_user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
 
   const handleAddList = () => {
     const newList: List = {
@@ -145,6 +157,20 @@ const Index = () => {
     toast.success("List deleted!");
   };
 
+  const handleLogin = (userData: { name: string; email: string }) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('taskboard_user');
+    setUser(null);
+    toast.success("Logged out successfully!");
+  };
+
+  const handleAuthClick = () => {
+    setAuthDialog(true);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -186,7 +212,13 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-board-bg">
-      <BoardHeader title={board.title} onAddList={handleAddList} />
+      <BoardHeader 
+        title={board.title} 
+        onAddList={handleAddList}
+        user={user}
+        onAuthClick={handleAuthClick}
+        onLogout={handleLogout}
+      />
       
       <DndContext collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
         <main className="p-6 overflow-x-auto">
@@ -212,6 +244,12 @@ const Index = () => {
         task={taskDialog.task}
         onSave={handleSaveTask}
         onDelete={handleDeleteTask}
+      />
+
+      <AuthDialog
+        open={authDialog}
+        onOpenChange={setAuthDialog}
+        onLogin={handleLogin}
       />
     </div>
   );
