@@ -17,6 +17,7 @@ export interface Board {
   id: string;
   title: string;
   description?: string;
+  workspaceId: string;
   lists: List[];
   createdAt: Date;
 }
