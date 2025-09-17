@@ -27,13 +27,15 @@ interface WorkspaceSidebarProps {
   currentWorkspace?: Workspace;
   onCreateWorkspace: () => void;
   onEditWorkspace: (workspace: Workspace) => void;
+  onCreateBoard?: () => void;
 }
 
-export function WorkspaceSidebar({ 
-  workspaces, 
-  currentWorkspace, 
+export function WorkspaceSidebar({
+  workspaces,
+  currentWorkspace,
   onCreateWorkspace,
-  onEditWorkspace 
+  onEditWorkspace,
+  onCreateBoard
 }: WorkspaceSidebarProps) {
   const { state } = useSidebar();
   const location = useLocation();
@@ -66,7 +68,7 @@ export function WorkspaceSidebar({
                       {currentWorkspace.name}
                     </h3>
                     <p className="text-xs text-muted-foreground truncate">
-                      {currentWorkspace.boards.length} boards
+                      {currentWorkspace.boards?.length || 0} boards
                     </p>
                   </div>
                 )}
@@ -95,7 +97,7 @@ export function WorkspaceSidebar({
                   variant="ghost"
                   size="sm"
                   className="h-5 w-5 p-0"
-                  onClick={() => {/* TODO: Add board creation */}}
+                  onClick={onCreateBoard}
                 >
                   <Plus className="w-3 h-3" />
                 </Button>
@@ -103,7 +105,7 @@ export function WorkspaceSidebar({
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {currentWorkspace.boards.map((board) => (
+                {(currentWorkspace.boards || []).map((board) => (
                   <SidebarMenuItem key={board.id}>
                     <SidebarMenuButton asChild>
                       <NavLink

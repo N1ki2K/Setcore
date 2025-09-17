@@ -6,6 +6,7 @@ import { Plus, Folder, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 import WorkspaceDialog from "@/components/WorkspaceDialog";
 import AuthDialog from "@/components/AuthDialog";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Workspace } from "@/types/workspace";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -49,12 +50,17 @@ const WorkspaceList = () => {
     }
   };
 
-  const handleLogin = (userData: { name: string; email: string }) => {
-    setUser(userData);
+  const handleLogin = (userData: { token: string; user: any }) => {
+    localStorage.setItem('token', userData.token);
+    setUser({
+      name: `${userData.user.first_name || ''} ${userData.user.last_name || ''}`.trim() || userData.user.username,
+      email: userData.user.email
+    });
     loadWorkspaces();
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
     localStorage.removeItem('taskboard_user');
     setUser(null);
     setWorkspaces([]);
@@ -113,10 +119,13 @@ const WorkspaceList = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center relative">
+        <div className="absolute top-6 right-6">
+          <ThemeToggle />
+        </div>
         <div className="text-center space-y-6 max-w-md">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold">Welcome to TaskBoard</h1>
+            <h1 className="text-3xl font-bold">Welcome to Setcore</h1>
             <p className="text-muted-foreground">
               Organize your projects with workspaces, boards, and tasks
             </p>
@@ -125,11 +134,11 @@ const WorkspaceList = () => {
             Get Started
           </Button>
         </div>
-        
+
         <AuthDialog
           open={authDialog}
           onOpenChange={setAuthDialog}
-          onLogin={handleLogin}
+          onSuccess={handleLogin}
         />
       </div>
     );
@@ -146,11 +155,12 @@ const WorkspaceList = () => {
           </div>
           
           <div className="flex items-center space-x-3">
+            <ThemeToggle />
             <Button onClick={handleCreateWorkspace}>
               <Plus className="w-4 h-4 mr-2" />
               Create Workspace
             </Button>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">

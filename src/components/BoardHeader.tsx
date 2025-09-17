@@ -2,18 +2,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Plus, Search, Users, LogOut, User } from "lucide-react";
+import { Plus, Search, Users, LogOut, User, Settings } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useState } from "react";
 
 interface BoardHeaderProps {
   title: string;
   onAddList: () => void;
+  onEditBoard?: () => void;
   user?: { name: string; email: string } | null;
   onAuthClick: () => void;
   onLogout: () => void;
 }
 
-const BoardHeader = ({ title, onAddList, user, onAuthClick, onLogout }: BoardHeaderProps) => {
+const BoardHeader = ({ title, onAddList, onEditBoard, user, onAuthClick, onLogout }: BoardHeaderProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   return (
@@ -21,6 +23,11 @@ const BoardHeader = ({ title, onAddList, user, onAuthClick, onLogout }: BoardHea
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+          {onEditBoard && (
+            <Button variant="ghost" size="sm" onClick={onEditBoard} className="text-muted-foreground">
+              <Settings className="w-4 h-4" />
+            </Button>
+          )}
           <Button variant="ghost" size="sm" className="text-muted-foreground">
             <Users className="w-4 h-4 mr-2" />
             Team
@@ -37,7 +44,9 @@ const BoardHeader = ({ title, onAddList, user, onAuthClick, onLogout }: BoardHea
               className="pl-10 w-64"
             />
           </div>
-          
+
+          <ThemeToggle />
+
           <Button onClick={onAddList} className="shadow-sm">
             <Plus className="w-4 h-4 mr-2" />
             Add List
@@ -61,6 +70,10 @@ const BoardHeader = ({ title, onAddList, user, onAuthClick, onLogout }: BoardHea
                     <p className="text-sm font-medium">{user.name}</p>
                     <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={onLogout} className="text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
