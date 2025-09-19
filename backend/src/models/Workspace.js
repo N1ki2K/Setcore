@@ -13,7 +13,13 @@ class Workspace {
     try {
       const [result] = await pool.execute(
         'INSERT INTO workspaces (id, name, description, color, user_id) VALUES (?, ?, ?, ?, ?)',
-        [this.id, this.name, this.description, this.color, this.user_id]
+        [
+          this.id || null,
+          this.name || null,
+          this.description || null,
+          this.color || null,
+          this.user_id || null
+        ]
       );
       return result;
     } catch (error) {
@@ -25,7 +31,12 @@ class Workspace {
     try {
       const [result] = await pool.execute(
         'UPDATE workspaces SET name = ?, description = ?, color = ? WHERE id = ?',
-        [this.name, this.description, this.color, this.id]
+        [
+          this.name || null,
+          this.description || null,
+          this.color || null,
+          this.id || null
+        ]
       );
       return result;
     } catch (error) {

@@ -20,7 +20,7 @@ const limiter = rateLimit({
 });
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
+  origin: process.env.CORS_ORIGIN || ['http://localhost:8080', 'http://localhost:8081'],
   credentials: true,
   optionsSuccessStatus: 200
 };

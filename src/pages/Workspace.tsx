@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { DndContext, DragEndEvent, closestCorners } from "@dnd-kit/core";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogOut, User, Settings } from "lucide-react";
 import { toast } from "sonner";
 import BoardHeader from "@/components/BoardHeader";
 import BoardList from "@/components/BoardList";
@@ -13,9 +10,9 @@ import TaskDialog from "@/components/TaskDialog";
 import AuthDialog from "@/components/AuthDialog";
 import ListDialog from "@/components/ListDialog";
 import BoardDialog from "@/components/BoardDialog";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { WorkspaceSidebar } from "@/components/WorkspaceSidebar";
 import WorkspaceDialog from "@/components/WorkspaceDialog";
+import AppHeader from "@/components/AppHeader";
 import { Board, List, Task } from "@/types/board";
 import { Workspace as WorkspaceType } from "@/types/workspace";
 import { apiService } from "@/services/api";
@@ -211,9 +208,12 @@ const Workspace = () => {
 
   const handleCreateWorkspace = async (workspaceData: { name: string; description?: string; color?: string }) => {
     try {
+      const { name, description, color } = workspaceData;
       const newWorkspace = {
         id: `workspace-${Date.now()}`,
-        ...workspaceData
+        name,
+        description,
+        color
       };
 
       await apiService.createWorkspace(newWorkspace);
@@ -260,7 +260,11 @@ const Workspace = () => {
         if (workspacesData.length > 0) {
           navigate(`/workspace/${workspacesData[0].id}`);
         } else {
-          navigate('/');
+          // If no workspaces left, clear current workspace but stay logged in
+          setCurrentWorkspace(null);
+          setCurrentBoard(null);
+          setLists([]);
+          // Stay on current URL, the UI will show "create workspace" options
         }
       }
 
@@ -547,17 +551,21 @@ const Workspace = () => {
   return (
     <div className="min-h-screen bg-background">
       <SidebarProvider>
-        <div className="flex h-screen">
-          <WorkspaceSidebar
-            workspaces={workspaces}
-            currentWorkspace={currentWorkspace}
-            onCreateWorkspace={() => setWorkspaceDialog({ open: true })}
-            onEditWorkspace={(workspace) => setWorkspaceDialog({ open: true, workspace })}
-            onCreateBoard={handleCreateBoard}
-            onEditBoard={handleEditBoard}
-          />
+        <div className="flex flex-col h-screen">
+          <AppHeader user={user} onLogout={handleLogout} />
 
-          <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex flex-1 overflow-hidden">
+            <WorkspaceSidebar
+              workspaces={workspaces}
+              currentWorkspace={currentWorkspace}
+              onCreateWorkspace={() => setWorkspaceDialog({ open: true })}
+              onEditWorkspace={(workspace) => setWorkspaceDialog({ open: true, workspace })}
+              onCreateBoard={handleCreateBoard}
+              onEditBoard={handleEditBoard}
+            />
+
+            <div className="flex-1 flex flex-col overflow-hidden">
+
             {currentBoard ? (
               <>
                 <BoardHeader
@@ -586,43 +594,8 @@ const Workspace = () => {
                 </main>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center space-y-6">
-                  <div className="mb-8 flex items-center space-x-4">
-                    <SidebarTrigger />
-                    <div className="flex items-center space-x-4 ml-auto">
-                      <ThemeToggle />
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback className="bg-primary text-primary-foreground">
-                                {user.name.charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56" align="end">
-                          <DropdownMenuItem className="flex items-center">
-                            <User className="mr-2 h-4 w-4" />
-                            <div className="flex flex-col space-y-1">
-                              <p className="text-sm font-medium">{user.name}</p>
-                              <p className="text-xs text-muted-foreground">{user.email}</p>
-                            </div>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Settings className="mr-2 h-4 w-4" />
-                            <span>Settings</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                            <LogOut className="mr-2 h-4 w-4" />
-                            <span>Log out</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-
+              <main className="flex-1 flex items-center justify-center p-8">
+                <div className="text-center space-y-6 max-w-md">
                   <h2 className="text-3xl font-bold text-foreground">
                     {currentWorkspace ? `Welcome to ${currentWorkspace.name}` : "Select a Workspace"}
                   </h2>
@@ -644,12 +617,25 @@ const Workspace = () => {
                       )}
                     </div>
                   ) : (
-                    <p className="text-lg text-muted-foreground">
-                      Choose a workspace from the sidebar to begin organizing your work
-                    </p>
+                    <div className="space-y-4">
+                      {workspaces.length === 0 ? (
+                        <>
+                          <p className="text-lg text-muted-foreground">
+                            You don't have any workspaces yet. Create your first workspace to get started!
+                          </p>
+                          <Button onClick={() => setWorkspaceDialog({ open: true })} size="lg">
+                            Create Workspace
+                          </Button>
+                        </>
+                      ) : (
+                        <p className="text-lg text-muted-foreground">
+                          Choose a workspace from the sidebar to begin organizing your work
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
-              </div>
+              </main>
             )}
           </div>
         </div>
